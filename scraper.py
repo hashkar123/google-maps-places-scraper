@@ -6,6 +6,7 @@ from seleniumFirefoxBase import launch_firefox_driver, webdriver, By, Keys, WebD
 import code
 import re
 import json
+from datetime import datetime
 
 # TODO: Calculate distance between the places and your home and sort the places accordingly (TIP: Use geopy.distance.distance(...) function)
 
@@ -23,8 +24,15 @@ def main():
     driver: webdriver.Firefox = launch_firefox_driver()
 
     # Scrape all places and their details
-    places_data_lst = scrape_places(driver, GOMAPS_URL)
+    # places_data_lst = scrape_places(driver, GOMAPS_URL)
+    places_data_lst = scrape_places(driver, GOMAPS_URL, 2)
     print(places_data_lst)
+
+    # Write to JSON file
+    time_str = datetime.now().strftime('%Y-%m-%d_%H-%M')
+    result_file = 'result_' + time_str + '.json'
+    with open(result_file, mode='w', encoding='utf-8') as json_f:
+        json.dump(places_data_lst, json_f, ensure_ascii=False)
 
     # TEST: Scrape place
     # driver.get(PLACE_URL)
@@ -95,7 +103,6 @@ def scrape_places(driver: webdriver.Firefox, gomaps_url: str, max_num_of_places:
         driver.switch_to.window(original_window)
         places_data_lst.append(place_data)
     return places_data_lst
-    
 
 
 def scrape_place(driver: webdriver.Firefox):
