@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 # TODO: Calculate distance between the places and your home and sort the places accordingly (TIP: Use geopy.distance.distance(...) function)
-
+# TODO: Add more user prompts (Ask if to take the query URL from 'constants.json' or to enter it as a prompt, or to search a place in a specific address)
 
 def main():
 
@@ -19,17 +19,27 @@ def main():
 
     GOMAPS_URL = constants_dict["GOMAPS_URL_QUERY"]
     PLACE_URL = constants_dict["PLACE_URL"]
+    try:
+        NUM_OF_PLACES = constants_dict["NUM_OF_PLACES"]
+    except:
+        NUM_OF_PLACES = 10
+        print('NUM_OF_PLACES not found in constants.json. It is set to 10 by default.');
+    # TEST = constants_dict["TEST"]
+    # print(TEST)
+
     # sidecard_xpath = r'//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[2]/div[1]/div[3]/div/a'
 
     driver: webdriver.Firefox = launch_firefox_driver()
 
     # Scrape all places and their details
     # places_data_lst = scrape_places(driver, GOMAPS_URL)
-    places_data_lst = scrape_places(driver, GOMAPS_URL, 2)
+    places_data_lst = scrape_places(driver, GOMAPS_URL, NUM_OF_PLACES)
     print(places_data_lst)
 
     # Write to JSON file
-    time_str = datetime.now().strftime('%Y-%m-%d_%H-%M')
+    # ct stores current time
+    ct = datetime.now()
+    time_str = ct.strftime('%Y-%m-%d_%H-%M') +  str(ct.timestamp()).replace('.','')
     result_file = 'result_' + time_str + '.json'
     with open(result_file, mode='w', encoding='utf-8') as json_f:
         json.dump(places_data_lst, json_f, ensure_ascii=False)
@@ -69,7 +79,7 @@ def scrape_places(driver: webdriver.Firefox, gomaps_url: str, max_num_of_places:
     places_feed = driver.find_element(By.CSS_SELECTOR, places_feed_css)
     while (count < max_num_of_places):
         # Make next place_card's CSS selector
-        place_card_css = r'div[role="feed"] > div:not([class]):nth-of-type(' + str(i*2+1) + ') > div[role="article"] > a'
+        place_card_css = r'div[role="feed"] > div:not([class]):nth-of-type(' + str(i*2+1) + ') > div:nth-child(1) > a'
         #
         place_card_a_lst = driver.find_elements(By.CSS_SELECTOR, place_card_css)
         # code.interact(local={**locals(), **globals()})
